@@ -34,9 +34,9 @@ api.interceptors.response.use(
   }
 );
 
-// Helper para extraer el .data de la respuesta
+// Helper para extraer el .data.data de la respuesta (según la estructura real de la API)
 const extractData = (promise) =>
-  promise.then(res => res.data);
+  promise.then(res => res.data.data);
 
 // CRUD genérico
 export const crud = {
@@ -49,7 +49,8 @@ export const crud = {
 // Login
 export const login = async (email, password) => {
   const res = await api.post('/auth/login', { email, password });
-  const { token, user } = res.data;
+  // La respuesta real tiene la estructura: { success, route, message, data: { token, user } }
+  const { token, user } = res.data.data;
   localStorage.setItem('token', token);
   localStorage.setItem('user', JSON.stringify(user));
   return { token, user };

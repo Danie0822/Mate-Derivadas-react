@@ -8,7 +8,7 @@ export default function Dashboard() {
   const userStats = [
     { label: 'Rol', value: user?.rol || 'N/A' },
     { label: 'Email', value: user?.email || 'N/A' },
-    { label: 'Teléfono', value: user?.cellphone || 'N/A' },
+    { label: 'Nombre', value: user?.full_name || 'N/A' },
     { label: 'ID', value: user?.id || 'N/A' },
   ];
 
@@ -62,8 +62,8 @@ export default function Dashboard() {
                   <dd className="mt-1 text-sm text-gray-900">{user?.email}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Teléfono</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{user?.cellphone}</dd>
+                  <dt className="text-sm font-medium text-gray-500">ID de usuario</dt>
+                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">{user?.id}</dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Rol</dt>

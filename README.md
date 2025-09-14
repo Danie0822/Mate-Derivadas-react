@@ -90,14 +90,17 @@ POST http://localhost:3000/auth/login
 **Respuesta esperada:**
 ```json
 {
-  "token": "string",
-  "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "full_name": "Daniel Morales",
-    "email": "ale@gmail.com",
-    "rol": "admin",
-    "cellphone": "1234567890",
-    "password": "Clave123!"
+  "success": true,
+  "route": "/auth/login",
+  "message": "User logged in",
+  "data": {
+    "token": "string",
+    "user": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "email": "ale@gmail.com",
+      "full_name": "Daniel Morales",
+      "rol": "admin"
+    }
   }
 }
 ```
