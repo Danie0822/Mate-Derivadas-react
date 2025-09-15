@@ -16,7 +16,6 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     resolver: yupResolver(loginSchema),
     defaultValues: {
@@ -43,12 +42,6 @@ export default function Login() {
     if (result.success) {
       navigate('/dashboard', { replace: true });
     }
-  };
-
-  // Función para llenar el formulario con datos de ejemplo
-  const fillExampleData = () => {
-    setValue('email', 'ale@gmail.com');
-    setValue('password', 'Clave123!');
   };
 
   return (
@@ -116,36 +109,9 @@ export default function Login() {
                 >
                   {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={fillExampleData}
-                  className="w-full"
-                >
-                  Llenar con datos de ejemplo
-                </Button>
               </div>
             </form>
 
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    Datos de prueba
-                  </span>
-                </div>
-              </div>
-              
-              <div className="mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                <p><strong>Email:</strong> ale@gmail.com</p>
-                <p><strong>Contraseña:</strong> Clave123!</p>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
