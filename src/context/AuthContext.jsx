@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
-import { getCurrentUser, isAuthenticated } from '../services/api';
+import { getCurrentUser, isAuthenticated } from '../services/node/auth.service';
 
 // Estado inicial
 const initialState = {
