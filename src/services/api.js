@@ -1,18 +1,26 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || 'http://localhost:3000'; // URL de la API Node.js de ejemplo
+const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL || 'http://localhost:8000'; // URL de la API Python de ejemplo
 
 // Obtiene el token JWT almacenado
 function getToken() {
   return localStorage.getItem('token');
 }
 
-// Instancia de axios con interceptores para JWT
-const api = axios.create({
-  baseURL: API_URL,
+// Instancia de axios para Node.js API con interceptores para JWT
+const nodeApi = axios.create({
+  baseURL: NODE_API_URL,
 });
 
-api.interceptors.request.use((config) => {
+// Instancia de axios para Python API
+const pythonApi = axios.create({
+  baseURL: PYTHON_API_URL,
+  timeout: 60000, // 60 segundos para operaciones como PDF processing
+});
+
+// Interceptores para Node.js API (con autenticación JWT)
+nodeApi.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -20,8 +28,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor para manejar errores de respuesta
-api.interceptors.response.use(
+nodeApi.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
@@ -34,21 +41,50 @@ api.interceptors.response.use(
   }
 );
 
-// Helper para extraer el .data.data de la respuesta (según la estructura real de la API)
-const extractData = (promise) =>
+// Interceptores para Python API (sin autenticación)
+pythonApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('Python API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
+// Helper para extraer el .data.data de la respuesta de Node.js API
+const extractNodeData = (promise) =>
   promise.then(res => res.data.data);
 
-// CRUD genérico
+// Helper para extraer data de la respuesta de Python API
+const extractPythonData = (promise) =>
+  promise.then(res => res.data);
+
+// CRUD genérico para Node.js API
 export const crud = {
-  get: (url, params) => extractData(api.get(url, { params })),
-  post: (url, data) => extractData(api.post(url, data)),
-  put: (url, data) => extractData(api.put(url, data)),
-  delete: (url) => extractData(api.delete(url)),
+  get: (url, params) => extractNodeData(nodeApi.get(url, { params })),
+  post: (url, data) => extractNodeData(nodeApi.post(url, data)),
+  put: (url, data) => extractNodeData(nodeApi.put(url, data)),
+  delete: (url) => extractNodeData(nodeApi.delete(url)),
+};
+
+// CRUD genérico para Python API
+export const pythonCrud = {
+  get: (url, params) => extractPythonData(pythonApi.get(url, { params })),
+  post: (url, data) => extractPythonData(pythonApi.post(url, data)),
+  put: (url, data) => extractPythonData(pythonApi.put(url, data)),
+  delete: (url) => extractPythonData(pythonApi.delete(url)),
+  // Para subida de archivos
+  postFile: (url, formData) => extractPythonData(
+    pythonApi.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  )
 };
 
 // Login
 export const login = async (email, password) => {
-  const res = await api.post('/auth/login', { email, password });
+  const res = await nodeApi.post('/auth/login', { email, password });
   // La respuesta real tiene la estructura: { success, route, message, data: { token, user } }
   const { token, user } = res.data.data;
   localStorage.setItem('token', token);
@@ -79,4 +115,6 @@ export const isAuthenticated = () => {
   return !!(token && user);
 };
 
-export default api;
+// Exportar las instancias de axios por si se necesitan directamente
+export { nodeApi, pythonApi };
+export default nodeApi;
