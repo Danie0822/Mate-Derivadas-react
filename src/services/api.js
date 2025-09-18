@@ -3,7 +3,7 @@ import axios from 'axios';
 const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || 'http://localhost:3000'; // URL de la API Node.js de ejemplo
 const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL || 'http://localhost:8000'; // URL de la API Python de ejemplo
 
-// Obtiene el token JWT almacenado
+// Función helper para obtener el token (evita dependencia circular)
 function getToken() {
   return localStorage.getItem('token');
 }
@@ -82,38 +82,8 @@ export const pythonCrud = {
   )
 };
 
-// Login
-export const login = async (email, password) => {
-  const res = await nodeApi.post('/auth/login', { email, password });
-  // La respuesta real tiene la estructura: { success, route, message, data: { token, user } }
-  const { token, user } = res.data.data;
-  localStorage.setItem('token', token);
-  localStorage.setItem('user', JSON.stringify(user));
-  return { token, user };
-};
-
-// Logout
-export const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-};
-
-// Obtener usuario actual: retorna el objeto user parseado o null
-export const getCurrentUser = () => {
-  const user = localStorage.getItem('user');
-  try {
-    return user && user !== "undefined" ? JSON.parse(user) : null;
-  } catch {
-    return null;
-  }
-};
-
-// Verificar si el usuario está autenticado
-export const isAuthenticated = () => {
-  const token = getToken();
-  const user = getCurrentUser();
-  return !!(token && user);
-};
+// Las funciones de autenticación (login, logout, etc.) 
+// se han movido a services/node/auth.service.js para mejor organización
 
 // Exportar las instancias de axios por si se necesitan directamente
 export { nodeApi, pythonApi };

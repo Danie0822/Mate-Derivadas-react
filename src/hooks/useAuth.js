@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { login as loginService, logout as logoutService } from '../services/api';
+import { login as loginService, logout as logoutService } from '../services/node/auth.service';
 import { useAuth } from '../context/AuthContext';
 
 export function useAuthActions() {
