@@ -105,9 +105,16 @@ export default function Sidebar({ isOpen, onToggle }) {
         <div className="flex flex-col h-full">
           {/* Header del sidebar */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-gray-900">
-              Mate Derivadas
-            </h1>
+            <div className="flex items-center space-x-3">
+              <img
+                src="/Derivium-Logo.avif"
+                alt="Derivium"
+                className="h-8 w-auto"
+              />
+              <h1 className="text-xl font-bold text-gray-900">
+                Derivium
+              </h1>
+            </div>
             <button
               onClick={onToggle}
               className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 lg:hidden"

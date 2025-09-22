@@ -60,9 +60,16 @@ export default function Header({ onMenuToggle }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-xl font-semibold text-gray-900 lg:hidden">
-              Mate Derivadas
-            </h1>
+            <div className="flex items-center space-x-2 lg:hidden">
+              <img
+                src="/Derivium-Logo.avif"
+                alt="Derivium"
+                className="h-6 w-auto"
+              />
+              <h1 className="text-xl font-semibold text-gray-900">
+                Derivium
+              </h1>
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
