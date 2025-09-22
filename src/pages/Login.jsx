@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
+import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { loginSchema } from '../schemas/authSchemas';
 import { useAuth } from '../context/AuthContext';
 import { useAuthActions } from '../hooks/useAuth';
@@ -10,7 +12,7 @@ import { Button, Input, Card, CardContent, CardHeader } from '../components/ui';
 export default function Login() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { login, isLoading, error, clearError } = useAuthActions();
+  const { login } = useAuthActions();
 
   const {
     register,
@@ -24,24 +26,41 @@ export default function Login() {
     },
   });
 
+  // Configurar la mutación para login
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }) => {
+      const result = await login(email, password);
+      if (!result.success) {
+        throw new Error(result.error || 'Error al iniciar sesión');
+      }
+      return result;
+    },
+    onSuccess: (data) => {
+      toast.success('¡Bienvenido! Sesión iniciada correctamente', {
+        duration: 3000,
+      });
+      navigate({ to: '/dashboard', replace: true });
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Error al iniciar sesión', {
+        duration: 5000,
+      });
+      console.error('Error en login:', error);
+    },
+  });
+
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard', { replace: true });
+      navigate({ to: '/dashboard', replace: true });
     }
   }, [isAuthenticated, navigate]);
 
-  // Limpiar errores cuando se monta el componente
-  useEffect(() => {
-    clearError();
-  }, [clearError]);
-
   const onSubmit = async (data) => {
-    const result = await login(data.email, data.password);
-    
-    if (result.success) {
-      navigate('/dashboard', { replace: true });
-    }
+    loginMutation.mutate({
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -66,23 +85,6 @@ export default function Login() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-red-800">
-                        {error}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <Input
                 label="Correo electrónico"
                 type="email"
@@ -104,10 +106,11 @@ export default function Login() {
                 <Button
                   type="submit"
                   size="lg"
-                  isLoading={isLoading}
+                  isLoading={loginMutation.isPending}
+                  disabled={loginMutation.isPending}
                   className="w-full"
                 >
-                  {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                  {loginMutation.isPending ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </Button>
               </div>
             </form>

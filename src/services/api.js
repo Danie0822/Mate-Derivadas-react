@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || 'http://localhost:3000'; // URL de la API Node.js de ejemplo
+const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || 'http://localhost:3000/api'; // URL de la API Node.js de ejemplo
 const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL || 'http://localhost:8000'; // URL de la API Python de ejemplo
 
 // Función helper para obtener el token (evita dependencia circular)

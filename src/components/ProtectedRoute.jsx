@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from '@tanstack/react-router';
 import { useAuth } from '../context/AuthContext';
 
 // Componente para rutas protegidas
@@ -20,7 +20,7 @@ export function ProtectedRoute({ children }) {
 
   // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;
