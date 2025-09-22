@@ -21,7 +21,7 @@ export default function Dashboard() {
             Dashboard
           </h1>
           <p className="mt-2 text-gray-600">
-            Bienvenido a tu panel de control de Mate Derivadas
+            Bienvenido a tu panel de control de Derivium
           </p>
         </div>
 
