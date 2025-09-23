@@ -64,7 +64,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <div className="flex justify-center mb-6">
@@ -74,19 +74,19 @@ export default function Login() {
               className="h-20 w-auto"
             />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h2 className="mt-6 text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
             Iniciar Sesión
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-700">
             Ingresa a tu cuenta de Derivium
           </p>
         </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-medium text-gray-900">
+        <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-green-500 text-white rounded-t-lg">
+            <h3 className="text-lg font-medium text-center">
               Bienvenido de vuelta
             </h3>
           </CardHeader>
@@ -115,7 +115,7 @@ export default function Login() {
                   size="lg"
                   isLoading={loginMutation.isPending}
                   disabled={loginMutation.isPending}
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0 shadow-lg"
                 >
                   {loginMutation.isPending ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </Button>

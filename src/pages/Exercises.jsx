@@ -67,20 +67,20 @@ export default function Exercises() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
               Ejercicios Interactivos
             </h1>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-gray-700">
               Práctica con ejercicios de derivadas
             </p>
           </div>
-          <Button className="mt-4 sm:mt-0">
+          <Button className="mt-4 sm:mt-0 bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0 shadow-lg">
             Nuevo Ejercicio
           </Button>
         </div>
 
         {/* Búsqueda */}
-        <Card>
+        <Card className="shadow-lg border-0 bg-gradient-to-r from-white to-blue-50/30">
           <CardContent>
             <Search
               placeholder="Buscar ejercicios por título, descripción o tema..."
@@ -92,29 +92,29 @@ export default function Exercises() {
 
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/40">
             <CardContent>
               <div className="p-2">
-                <dt className="text-sm font-medium text-gray-500">Total Ejercicios</dt>
-                <dd className="mt-1 text-2xl font-semibold text-gray-900">{mockExercises.length}</dd>
+                <dt className="text-sm font-medium text-gray-600">Total Ejercicios</dt>
+                <dd className="mt-1 text-2xl font-semibold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">{mockExercises.length}</dd>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-green-50/40">
             <CardContent>
               <div className="p-2">
-                <dt className="text-sm font-medium text-gray-500">Temas</dt>
-                <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                <dt className="text-sm font-medium text-gray-600">Temas</dt>
+                <dd className="mt-1 text-2xl font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   {[...new Set(mockExercises.map(e => e.topic))].length}
                 </dd>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/40">
             <CardContent>
               <div className="p-2">
-                <dt className="text-sm font-medium text-gray-500">Dificultades</dt>
-                <dd className="mt-1 text-2xl font-semibold text-gray-900">3</dd>
+                <dt className="text-sm font-medium text-gray-600">Dificultades</dt>
+                <dd className="mt-1 text-2xl font-semibold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">3</dd>
               </div>
             </CardContent>
           </Card>
@@ -123,7 +123,7 @@ export default function Exercises() {
         {/* Lista de ejercicios */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredExercises.map((exercise) => (
-            <Card key={exercise.id} className="hover:shadow-lg transition-shadow duration-200">
+            <Card key={exercise.id} className="hover:shadow-xl transition-shadow duration-200 shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/20">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <h3 className="text-lg font-medium text-gray-900 line-clamp-2">
@@ -149,7 +149,7 @@ export default function Exercises() {
                     <span className="text-xs font-medium text-gray-500">Tags:</span>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {exercise.tags.map((tag, index) => (
-                        <span key={index} className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-50 text-blue-700">
+                        <span key={index} className="inline-flex items-center px-2 py-1 rounded text-xs bg-gradient-to-r from-blue-100 to-green-100 text-blue-700">
                           {tag}
                         </span>
                       ))}
@@ -161,10 +161,10 @@ export default function Exercises() {
                       {new Date(exercise.created_at).toLocaleDateString()}
                     </span>
                     <div className="space-x-2">
-                      <Button size="sm" variant="ghost">
+                      <Button size="sm" variant="ghost" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50">
                         Ver
                       </Button>
-                      <Button size="sm">
+                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0">
                         Resolver
                       </Button>
                     </div>

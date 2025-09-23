@@ -10,7 +10,7 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-blue-50/30 to-green-50/30">
       <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
       <div className="flex-1 flex flex-col">
         <Header onMenuToggle={toggleSidebar} />

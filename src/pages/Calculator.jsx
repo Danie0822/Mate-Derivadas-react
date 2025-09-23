@@ -6,24 +6,24 @@ export default function Calculator() {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
             Calculadora de Derivadas
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-700">
             Calcula derivadas de funciones matemáticas
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-medium text-gray-900">
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/50">
+          <CardHeader className="bg-gradient-to-r from-blue-100 to-green-100 border-b border-blue-200/50">
+            <h3 className="text-lg font-medium bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
               Próximamente
             </h3>
           </CardHeader>
           <CardContent>
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🧮</div>
-              <p className="text-gray-500">
+              <p className="text-gray-600">
                 La calculadora de derivadas estará disponible pronto
               </p>
             </div>

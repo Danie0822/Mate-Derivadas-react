@@ -67,10 +67,10 @@ export default function AIChat() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
               Chat con IA
             </h1>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-gray-700">
               Asistente inteligente para ayudarte con matemáticas
             </p>
           </div>
@@ -79,7 +79,7 @@ export default function AIChat() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gradient-to-r from-blue-50 to-green-50"
             >
               {roles.map(role => (
                 <option key={role.id} value={role.id}>
@@ -93,9 +93,9 @@ export default function AIChat() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Panel lateral con información */}
           <div className="lg:col-span-1 space-y-4">
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-medium text-gray-900">
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/30">
+              <CardHeader className="bg-gradient-to-r from-blue-100 to-green-100 border-b border-blue-200/50">
+                <h3 className="text-lg font-medium bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
                   Roles Disponibles
                 </h3>
               </CardHeader>
@@ -106,8 +106,8 @@ export default function AIChat() {
                       key={role.id}
                       className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                         selectedRole === role.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:bg-gray-50'
+                          ? 'border-blue-500 bg-gradient-to-r from-blue-100 to-green-100'
+                          : 'border-gray-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50'
                       }`}
                       onClick={() => setSelectedRole(role.id)}
                     >
@@ -119,9 +119,9 @@ export default function AIChat() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-medium text-gray-900">
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-green-50/30">
+              <CardHeader className="bg-gradient-to-r from-green-100 to-blue-100 border-b border-green-200/50">
+                <h3 className="text-lg font-medium bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   Preguntas Rápidas
                 </h3>
               </CardHeader>
@@ -131,7 +131,7 @@ export default function AIChat() {
                     <button
                       key={index}
                       onClick={() => handleQuickQuestion(question)}
-                      className="w-full text-left p-2 text-sm text-gray-600 hover:bg-gray-50 rounded border border-gray-200 transition-colors"
+                      className="w-full text-left p-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50 rounded border border-green-200 transition-colors"
                     >
                       {question}
                     </button>
@@ -143,7 +143,7 @@ export default function AIChat() {
 
           {/* Chat principal */}
           <div className="lg:col-span-3">
-            <Card className="h-[600px] flex flex-col">
+            <Card className="h-[600px] flex flex-col shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/20">
               {/* Área de mensajes */}
               <CardContent className="flex-1 p-0">
                 <div className="h-full flex flex-col">
@@ -154,10 +154,10 @@ export default function AIChat() {
                         className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow-sm ${
                             message.type === 'user'
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-900'
+                              ? 'bg-gradient-to-r from-blue-600 to-green-600 text-white'
+                              : 'bg-gradient-to-r from-gray-100 to-blue-50 text-gray-900 border border-blue-200/50'
                           }`}
                         >
                           <div className="text-sm">{message.content}</div>
@@ -172,9 +172,9 @@ export default function AIChat() {
                     
                     {isLoading && (
                       <div className="flex justify-start">
-                        <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
+                        <div className="bg-gradient-to-r from-gray-100 to-blue-50 text-gray-900 px-4 py-2 rounded-lg shadow-sm border border-blue-200/50">
                           <div className="flex items-center space-x-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                             <span className="text-sm">Escribiendo...</span>
                           </div>
                         </div>
@@ -183,14 +183,14 @@ export default function AIChat() {
                   </div>
 
                   {/* Input de mensaje */}
-                  <div className="border-t border-gray-200 p-4">
+                  <div className="border-t border-blue-200/50 p-4 bg-gradient-to-r from-blue-50/50 to-green-50/50">
                     <div className="flex space-x-3">
                       <input
                         type="text"
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         placeholder="Escribe tu pregunta sobre matemáticas..."
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                         disabled={isLoading}
                       />
@@ -198,6 +198,7 @@ export default function AIChat() {
                         onClick={handleSendMessage}
                         disabled={!inputMessage.trim() || isLoading}
                         isLoading={isLoading}
+                        className="bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0 shadow-lg"
                       >
                         Enviar
                       </Button>

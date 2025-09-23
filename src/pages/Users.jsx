@@ -106,16 +106,23 @@ export default function Users() {
           <Button 
             variant="ghost" 
             size="sm"
+            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
             onClick={() => handleEditUser(row.original)}
           >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
             Editar
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-red-600 hover:text-red-800"
+            className="text-red-600 hover:text-red-800 hover:bg-red-50"
             onClick={() => handleDeleteUser(row.original)}
           >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
             Eliminar
           </Button>
         </div>
@@ -237,7 +244,7 @@ export default function Users() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
               Gestión de Usuarios
             </h1>
             <p className="mt-2 text-gray-600">
@@ -245,9 +252,12 @@ export default function Users() {
             </p>
           </div>
           <Button 
-            className="mt-4 sm:mt-0"
+            className="mt-4 sm:mt-0 bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0"
             onClick={() => setIsCreateModalOpen(true)}
           >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
             Nuevo Usuario
           </Button>
         </div>
@@ -264,8 +274,8 @@ export default function Users() {
         </Card>
 
         {/* Lista de usuarios */}
-        <Card>
-          <CardHeader>
+        <Card className="border-blue-100 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 border-b border-blue-100">
             <h3 className="text-lg font-medium text-gray-900">
               Usuarios ({filteredUsers.length})
             </h3>
@@ -292,9 +302,12 @@ export default function Users() {
                       </p>
                       {!searchQuery && (
                         <Button 
-                          className="mt-4"
+                          className="mt-4 bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0"
                           onClick={() => setIsCreateModalOpen(true)}
                         >
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
                           Crear Primer Usuario
                         </Button>
                       )}
@@ -304,13 +317,13 @@ export default function Users() {
                   <div className="overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gradient-to-r from-blue-50 to-green-50">
                           {table.getHeaderGroups().map(headerGroup => (
                             <tr key={headerGroup.id}>
                               {headerGroup.headers.map(header => (
                                 <th 
                                   key={header.id}
-                                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider"
                                 >
                                   {flexRender(header.column.columnDef.header, header.getContext())}
                                 </th>
@@ -343,7 +356,7 @@ export default function Users() {
                                       return (
                                         <div
                                           key={row.id}
-                                          className="absolute inset-x-0 hover:bg-gray-50 border-b border-gray-200"
+                                          className="absolute inset-x-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 border-b border-gray-200 transition-colors duration-200"
                                           style={{
                                             height: `${virtualRow.size}px`,
                                             transform: `translateY(${virtualRow.start}px)`,
@@ -377,7 +390,7 @@ export default function Users() {
                           ) : (
                             // Renderizado normal para listas pequeñas
                             rows.map(row => (
-                              <tr key={row.id} className="hover:bg-gray-50">
+                              <tr key={row.id} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 transition-colors duration-200">
                                 {row.getVisibleCells().map(cell => (
                                   <td 
                                     key={cell.id}
