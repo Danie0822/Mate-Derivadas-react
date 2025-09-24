@@ -89,14 +89,14 @@ export default function Exercises() {
   // Ref para el contenedor de scroll
   const parentRef = useRef();
 
-  // Configurar el virtualizer con altura dinámica
+    // Configurar el virtualizer con altura dinámica
   const virtualizer = useVirtualizer({
     count: exerciseRows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => cardsPerRow === 1 ? 320 : cardsPerRow === 2 ? 300 : 280, // Ajustar altura según responsive
+    estimateSize: () => cardsPerRow === 1 ? 400 : cardsPerRow === 2 ? 380 : 360, 
     paddingStart: 0,
     paddingEnd: 0,
-    overscan: 2, // Renderizar 2 elementos extra para scroll suave
+    overscan: 2, 
   });
 
   // Mutación para crear ejercicio
@@ -348,9 +348,9 @@ export default function Exercises() {
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-6 pb-12">
                       {exerciseRow.map((exercise) => (
-                        <Card key={exercise.id} className="hover:shadow-xl transition-shadow duration-200 shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/20">
+                        <Card key={exercise.id} className="hover:shadow-xl transition-shadow duration-200 shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/20 min-h-[280px] flex flex-col">
                           <CardHeader>
                             <div className="flex items-start justify-between">
                               <h3 className="text-lg font-medium text-gray-900 line-clamp-2">
@@ -361,14 +361,14 @@ export default function Exercises() {
                               </span>
                             </div>
                           </CardHeader>
-                          <CardContent>
+                          <CardContent className="flex-grow flex flex-col">
                             {exercise.description && (
                               <div className="text-sm text-gray-600 mb-4 line-clamp-3">
                                 <div dangerouslySetInnerHTML={{ __html: exercise.description }} />
                               </div>
                             )}
                             
-                            <div className="space-y-3">
+                            <div className="flex-grow space-y-3">
                               {exercise.topic && (
                                 <div>
                                   <span className="text-xs font-medium text-gray-500">Tema:</span>
@@ -391,8 +391,9 @@ export default function Exercises() {
                                   </div>
                                 </div>
                               )}
+                            </div>
 
-                              <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                            <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
                                 <span className="text-xs text-gray-500">
                                   {exercise.created_at ? new Date(exercise.created_at).toLocaleDateString() : 'N/A'}
                                 </span>
@@ -423,7 +424,6 @@ export default function Exercises() {
                                   </Button>
                                 </div>
                               </div>
-                            </div>
                           </CardContent>
                         </Card>
                       ))}
