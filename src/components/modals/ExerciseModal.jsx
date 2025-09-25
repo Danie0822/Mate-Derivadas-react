@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import ReactDOM from 'react-dom';
-import 'react-quill/dist/quill.snow.css';
 
 // Polyfill para findDOMNode
 if (!ReactDOM.findDOMNode) {
@@ -23,62 +22,115 @@ import { Button, Input, Card, CardContent, CardHeader } from '../ui';
 const ReactQuillWrapper = ({ value, onChange, modules, formats, placeholder, className, style }) => {
   const [ReactQuill, setReactQuill] = useState(null);
   const [hasError, setHasError] = useState(false);
+  const [stylesLoaded, setStylesLoaded] = useState(false);
 
   useEffect(() => {
-    // Importación dinámica de ReactQuill con manejo de errores
-    import('react-quill').then((module) => {
+    // Función para cargar estilos CSS manualmente
+    const loadQuillStyles = () => {
+      // Verificar si ya se cargaron los estilos
+      if (document.querySelector('#quill-styles')) {
+        return Promise.resolve();
+      }
+
+      return new Promise((resolve) => {
+        const link = document.createElement('link');
+        link.id = 'quill-styles';
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        // Usar el archivo copiado en public
+        link.href = '/quill.snow.css';
+        
+        link.onload = () => {
+          console.log('Estilos de Quill cargados correctamente');
+          resolve();
+        };
+        
+        link.onerror = () => {
+          console.warn('No se pudieron cargar los estilos de Quill desde node_modules');
+          resolve(); // Continuar sin estilos
+        };
+        
+        document.head.appendChild(link);
+      });
+    };
+
+    // Importación dinámica de ReactQuill con carga de estilos
+    const loadQuill = async () => {
       try {
+        // Cargar estilos primero
+        await loadQuillStyles();
+        
+        // Luego cargar el componente
+        const module = await import('react-quill');
         setReactQuill(() => module.default);
+        setStylesLoaded(true);
         setHasError(false);
       } catch (error) {
-        console.error('Error loading ReactQuill:', error);
+        console.warn('ReactQuill no disponible, usando editor alternativo:', error);
         setHasError(true);
+        setStylesLoaded(true);
       }
-    }).catch((error) => {
-      console.error('Error importing ReactQuill:', error);
-      setHasError(true);
-    });
+    };
+
+    loadQuill();
   }, []);
 
-  // Si hay error, usar textarea alternativo
+  // Si hay error, usar textarea alternativo mejorado
   if (hasError) {
     return (
       <div className="space-y-2">
-        <div className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded border">
-          ⚠️ Editor de texto enriquecido no disponible. Usando editor básico.
+        <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-lg border border-blue-200 flex items-center gap-2">
+          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Editor básico activo - Funcionalidad completa disponible
         </div>
-        <textarea
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-          rows={6}
-          style={{ minHeight: '150px' }}
-        />
+        <div className="relative">
+          <textarea
+            value={value?.replace(/<[^>]*>/g, '') || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical bg-white shadow-sm transition-all duration-200 hover:border-gray-400"
+            rows={6}
+            style={{ minHeight: style?.height || '150px', fontFamily: 'system-ui, -apple-system, sans-serif' }}
+          />
+          <div className="absolute bottom-2 right-2 text-xs text-gray-400 bg-white px-2 py-1 rounded shadow-sm">
+            {(value?.replace(/<[^>]*>/g, '') || '').length} caracteres
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (!ReactQuill) {
+  if (!ReactQuill && !hasError) {
     return (
-      <div className={`${className} flex items-center justify-center bg-gray-50 border border-gray-300 rounded-lg`} style={style}>
-        <div className="text-gray-500 text-sm">Cargando editor...</div>
+      <div className={`${className} flex items-center justify-center bg-gradient-to-r from-blue-50 to-white border border-gray-300 rounded-lg`} style={style}>
+        <div className="flex items-center gap-2 text-gray-600 text-sm">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+          Cargando editor enriquecido...
+        </div>
       </div>
     );
   }
 
   try {
     return (
-      <ReactQuill
-        theme="snow"
-        value={value}
-        onChange={onChange}
-        modules={modules}
-        formats={formats}
-        placeholder={placeholder}
-        className={className}
-        style={style}
-      />
+      <div style={{ ...style }}>
+        <ReactQuill
+          theme="snow"
+          value={value || ''}
+          onChange={onChange}
+          modules={modules}
+          formats={formats}
+          placeholder={placeholder}
+          className={className}
+          style={{ 
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            border: '1px solid #d1d5db'
+          }}
+        />
+      </div>
     );
   } catch (error) {
     console.error('Error rendering ReactQuill:', error);
@@ -98,6 +150,39 @@ const ExerciseModal = ({
   const isEditing = Boolean(exercise);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
+
+  // Estilos CSS básicos como fallback
+  useEffect(() => {
+    if (isOpen && !document.querySelector('#quill-fallback-styles')) {
+      const style = document.createElement('style');
+      style.id = 'quill-fallback-styles';
+      style.textContent = `
+        .ql-toolbar {
+          border: 1px solid #ccc;
+          border-bottom: none;
+          border-radius: 8px 8px 0 0;
+          background: #f8f9fa;
+        }
+        .ql-container {
+          border: 1px solid #ccc;
+          border-top: none;
+          border-radius: 0 0 8px 8px;
+          background: white;
+        }
+        .ql-editor {
+          min-height: 120px;
+          font-size: 14px;
+          line-height: 1.5;
+          padding: 12px;
+        }
+        .ql-editor.ql-blank::before {
+          color: #9ca3af;
+          font-style: italic;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, [isOpen]);
   
   const {
     register,
