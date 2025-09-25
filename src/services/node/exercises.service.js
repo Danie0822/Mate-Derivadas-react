@@ -31,6 +31,12 @@ export const getExercises = () => crud.get(`/${RESOURCE}`)
 export const getExercise = (exerciseId) => crud.get(`/${RESOURCE}/${exerciseId}`)
 
 /**
+ * Obtiene todos los ejercicios para select (solo id, title, topic)
+ * @returns {Promise} Promesa que resuelve con la lista de ejercicios para select
+ */
+export const getExercisesForSelect = () => crud.get(`/${RESOURCE}/select/all`)
+
+/**
  * Actualiza un ejercicio existente
  * @param {string} exerciseId - ID del ejercicio a actualizar
  * @param {Object} payload - Los datos del ejercicio a actualizar
