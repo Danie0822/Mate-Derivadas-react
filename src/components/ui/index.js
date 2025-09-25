@@ -3,4 +3,5 @@ export { default as Button } from './Button';
 export { default as Input } from './Input';
 export { default as Card, CardHeader, CardContent } from './Card';
 export { default as Search } from './Search';
+export { default as Select } from './Select';
 export { Skeleton, UserTableRowSkeleton, UserTableSkeleton, UserFormSkeleton } from './Skeleton';
