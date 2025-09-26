@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getLevelText, getLevelColor } from '../../schemas/studyGuideSchemas';
+import { getStudyGuideExercises } from '../../services/node/study-guides.service'
+import SolveExerciseModal from './SolveExerciseModal'
 
 const StudyGuideDetailModal = ({ 
   isOpen, 
@@ -9,6 +12,58 @@ const StudyGuideDetailModal = ({
   onDelete
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedExercise, setSelectedExercise] = useState(null);
+  const [isSolveModalOpen, setIsSolveModalOpen] = useState(false);
+
+  // Query para obtener los ejercicios completos de la guía de estudio
+  const { 
+    data: exercisesResponse, 
+    isLoading: isLoadingExercises,
+    error: exercisesError 
+  } = useQuery({
+    queryKey: ['studyGuideExercises', studyGuide?.id],
+    queryFn: () => getStudyGuideExercises(studyGuide.id),
+    enabled: isOpen && !!studyGuide?.id,
+    select: (data) => {
+      // Manejar tanto casos donde los datos vienen en data.data como directamente
+      if (Array.isArray(data)) return data;
+      if (data?.data && Array.isArray(data.data)) return data.data;
+      return [];
+    }
+  });
+
+  const handleSolveExercise = (exercise) => {
+    setSelectedExercise(exercise);
+    setIsSolveModalOpen(true);
+  };
+
+  const handleCloseSolveModal = () => {
+    setIsSolveModalOpen(false);
+    setSelectedExercise(null);
+  };
+
+  const handleSubmitAnswer = (answerData) => {
+    console.log('Respuesta del usuario:', answerData);
+    // Aquí puedes implementar la lógica de comparación o envío
+  };
+
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case 'easy': return 'bg-green-100 text-green-800 border-green-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'hard': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getDifficultyText = (difficulty) => {
+    switch (difficulty) {
+      case 'easy': return 'Fácil';
+      case 'medium': return 'Intermedio';
+      case 'hard': return 'Difícil';
+      default: return difficulty;
+    }
+  };
 
   if (!isOpen || !studyGuide) return null;
 
@@ -268,44 +323,121 @@ const StudyGuideDetailModal = ({
 
           {activeTab === 'exercises' && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">💡 Ejercicios Relacionados</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">💡 Ejercicios Relacionados</h3>
+                {isLoadingExercises && (
+                  <div className="text-sm text-gray-500">Cargando ejercicios...</div>
+                )}
+              </div>
               
-              {studyGuide.exercises && studyGuide.exercises.length > 0 ? (
-                <div className="space-y-3">
-                  {studyGuide.exercises
+              {exercisesError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800">Error al cargar los ejercicios: {exercisesError.message}</p>
+                </div>
+              )}
+
+              {!isLoadingExercises && !exercisesError && exercisesResponse && exercisesResponse.length > 0 ? (
+                <div className="space-y-4">
+                  {exercisesResponse
                     .sort((a, b) => (a.order || 0) - (b.order || 0))
                     .map((exercise, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-semibold text-purple-800">
-                              {exercise.order || index + 1}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900">{exercise.title}</h4>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                                ID: {exercise.exercise_id}
+                      <div key={exercise.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        {/* Header del ejercicio */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-semibold text-purple-800">
+                                {exercise.order || index + 1}
                               </span>
-                              {exercise.required && (
-                                <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded">
-                                  Requerido
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 text-lg mb-2">{exercise.title}</h4>
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(exercise.difficulty)}`}>
+                                  {getDifficultyText(exercise.difficulty)}
                                 </span>
-                              )}
+                                {exercise.topic && (
+                                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                    📚 {exercise.topic}
+                                  </span>
+                                )}
+                                {exercise.required && (
+                                  <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                    ⚠️ Requerido
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
+                          <button
+                            onClick={() => handleSolveExercise(exercise)}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 font-medium"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            Resolver
+                          </button>
                         </div>
+
+                        {/* Descripción del ejercicio */}
+                        {exercise.description && (
+                          <div className="mb-4">
+                            <h5 className="font-medium text-gray-900 mb-2">Descripción:</h5>
+                            <div 
+                              className="prose prose-sm max-w-none text-gray-700 bg-gray-50 p-3 rounded-lg border"
+                              dangerouslySetInnerHTML={{ __html: exercise.description }}
+                            />
+                          </div>
+                        )}
+
+                        {/* Contenido/Pregunta del ejercicio */}
+                        {exercise.content && (
+                          <div className="mb-4">
+                            <h5 className="font-medium text-gray-900 mb-2">Pregunta:</h5>
+                            <div 
+                              className="prose prose-sm max-w-none text-gray-700 bg-blue-50 p-3 rounded-lg border border-blue-200"
+                              dangerouslySetInnerHTML={{ 
+                                __html: exercise.content.question || JSON.stringify(exercise.content) 
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {/* Tags del ejercicio */}
+                        {exercise.tags && exercise.tags.length > 0 && (
+                          <div className="mb-4">
+                            <h5 className="font-medium text-gray-900 mb-2">Etiquetas:</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {exercise.tags.map((tag, tagIndex) => (
+                                <span
+                                  key={tagIndex}
+                                  className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                                >
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Notas adicionales si las hay */}
+                        {exercise.notes && (
+                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <h5 className="font-medium text-yellow-900 mb-1">📝 Notas:</h5>
+                            <p className="text-sm text-yellow-800">{exercise.notes}</p>
+                          </div>
+                        )}
                       </div>
                     ))}
                 </div>
-              ) : (
+              ) : !isLoadingExercises && !exercisesError ? (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-6xl mb-4">💡</div>
                   <p>No hay ejercicios relacionados disponibles</p>
                   <p className="text-sm mt-2">Edita la guía para agregar ejercicios</p>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>
@@ -342,6 +474,14 @@ const StudyGuideDetailModal = ({
           )}
         </div>
       </div>
+
+      {/* Modal para resolver ejercicio */}
+      <SolveExerciseModal
+        isOpen={isSolveModalOpen}
+        onClose={handleCloseSolveModal}
+        exercise={selectedExercise}
+        onSubmitAnswer={handleSubmitAnswer}
+      />
     </div>
   );
 };
