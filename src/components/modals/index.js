@@ -6,3 +6,4 @@ export { default as ExerciseDetailModal } from './ExerciseDetailModal';
 export { default as StudyGuideModal } from './StudyGuideModal';
 export { default as DeleteStudyGuideModal } from './DeleteStudyGuideModal';
 export { default as StudyGuideDetailModal } from './StudyGuideDetailModal';
+export { default as SolveExerciseModal } from './SolveExerciseModal';
