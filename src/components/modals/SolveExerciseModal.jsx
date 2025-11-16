@@ -3,7 +3,12 @@ import ReactDOM from 'react-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import toast from 'react-hot-toast';
 import { Button, Input, Card, CardContent, CardHeader } from '../ui';
+import VerifyingAnswerModal from './VerifyingAnswerModal';
+import { compareExpressions, isComplexExpression, stripHtml, buildVerificationPrompt } from '../../utils/mathUtils';
+import { askAIQuestion } from '../../services/node/ai-questions.service';
+import { createUserExercise } from '../../services/node/user-exercises.service';
 
 // Polyfill para findDOMNode
 if (!ReactDOM.findDOMNode) {
@@ -115,11 +120,14 @@ const SolveExerciseModal = ({
   isOpen, 
   onClose, 
   exercise = null,
-  onSubmitAnswer
+  onSubmitAnswer,
+  userId = '550e8400-e29b-41d4-a716-446655440000' // ID por defecto, se puede pasar como prop
 }) => {
   const [userAnswer, setUserAnswer] = useState('');
   const [showSolution, setShowSolution] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState(null);
 
   const {
     handleSubmit,
@@ -164,17 +172,177 @@ const SolveExerciseModal = ({
       setUserAnswer('');
       setShowSolution(false);
       setHasSubmitted(false);
+      setVerificationResult(null);
+      setIsVerifying(false);
     }
   }, [isOpen, exercise, reset]);
 
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = async (data) => {
     setHasSubmitted(true);
-    if (onSubmitAnswer) {
-      onSubmitAnswer({
-        exerciseId: exercise.id,
-        userAnswer: data.userAnswer,
-        correctSolution: exercise.solution
+    setVerificationResult(null);
+    
+    const userAnswerText = stripHtml(data.userAnswer);
+    
+    // Obtener la solución correcta del ejercicio
+    let correctSolution = '';
+    if (exercise.solution) {
+      if (typeof exercise.solution === 'object' && exercise.solution.answer) {
+        correctSolution = exercise.solution.answer;
+      } else if (typeof exercise.solution === 'string') {
+        correctSolution = exercise.solution;
+      }
+    } else if (exercise.content?.solution) {
+      correctSolution = exercise.content.solution;
+    }
+    
+    const correctSolutionText = stripHtml(correctSolution);
+    
+    // Debug: mostrar en consola
+    console.log('🔍 Verificación de respuesta:');
+    console.log('Respuesta usuario (original):', data.userAnswer);
+    console.log('Respuesta usuario (limpia):', userAnswerText);
+    console.log('Solución correcta (original):', correctSolution);
+    console.log('Solución correcta (limpia):', correctSolutionText);
+    
+    // Paso 1: Comparación directa
+    if (compareExpressions(userAnswerText, correctSolutionText)) {
+      // Respuesta correcta!
+      setVerificationResult({ 
+        isCorrect: true, 
+        message: '¡Correcto! Tu respuesta es matemáticamente equivalente a la solución esperada.' 
       });
+      toast.success('¡Excelente! Tu respuesta es correcta.');
+      
+      // Guardar el registro del ejercicio resuelto
+      try {
+        await createUserExercise({
+          user_id: userId,
+          exercise_id: exercise.id,
+          answer: { answer: userAnswerText },
+          is_correct: true,
+          answered_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error al guardar el ejercicio resuelto:', error);
+      }
+      
+      if (onSubmitAnswer) {
+        onSubmitAnswer({
+          exerciseId: exercise.id,
+          userAnswer: data.userAnswer,
+          correctSolution: correctSolution,
+          isCorrect: true
+        });
+      }
+      
+      return;
+    }
+    
+    // Paso 2: Verificar si la expresión es compleja
+    const isComplex = isComplexExpression(correctSolutionText) || isComplexExpression(userAnswerText);
+    
+    if (!isComplex) {
+      // No es compleja y no coincidió, entonces es incorrecta
+      setVerificationResult({ isCorrect: false, message: 'La respuesta no coincide con la solución esperada.' });
+      toast.error('Respuesta incorrecta. Revisa tu solución.');
+      
+      // Guardar como incorrecta
+      try {
+        await createUserExercise({
+          user_id: userId,
+          exercise_id: exercise.id,
+          answer: { answer: userAnswerText },
+          is_correct: false,
+          answered_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error al guardar el ejercicio resuelto:', error);
+      }
+      
+      if (onSubmitAnswer) {
+        onSubmitAnswer({
+          exerciseId: exercise.id,
+          userAnswer: data.userAnswer,
+          correctSolution: correctSolution,
+          isCorrect: false
+        });
+      }
+      
+      return;
+    }
+    
+    // Paso 3: Es compleja, usar IA para verificar
+    setIsVerifying(true);
+    
+    try {
+      const prompt = buildVerificationPrompt(exercise, userAnswerText, correctSolutionText);
+      
+      const response = await askAIQuestion({
+        user_id: userId,
+        question: prompt
+      });
+      
+      const aiAnswer = response.data?.answer || response.answer || '';
+      
+      // Parsear la respuesta de la IA
+      const isCorrect = aiAnswer.toUpperCase().includes('CORRECTO') && !aiAnswer.toUpperCase().includes('INCORRECTO');
+      
+      let explanation = '';
+      if (isCorrect) {
+        // Para respuestas correctas, mostrar toda la respuesta de la IA como explicación
+        explanation = aiAnswer.replace(/^CORRECTO:?\s*/i, '').trim() || '¡Tu respuesta es matemáticamente correcta! La IA ha verificado que es equivalente a la solución esperada.';
+      } else {
+        // Extraer la explicación después de "INCORRECTO:"
+        const match = aiAnswer.match(/INCORRECTO:\s*(.+)/i);
+        explanation = match ? match[1].trim() : 'La respuesta no es matemáticamente equivalente a la solución esperada.';
+      }
+      
+      setVerificationResult({ 
+        isCorrect, 
+        message: explanation 
+      });
+      
+      if (isCorrect) {
+        toast.success('¡Excelente! Tu respuesta es correcta.');
+      } else {
+        toast.error(`Respuesta incorrecta: ${explanation}`, { duration: 6000 });
+      }
+      
+      // Guardar el resultado
+      try {
+        await createUserExercise({
+          user_id: userId,
+          exercise_id: exercise.id,
+          answer: { 
+            answer: userAnswerText,
+            aiVerification: aiAnswer
+          },
+          is_correct: isCorrect,
+          answered_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error al guardar el ejercicio resuelto:', error);
+      }
+      
+      if (onSubmitAnswer) {
+        onSubmitAnswer({
+          exerciseId: exercise.id,
+          userAnswer: data.userAnswer,
+          correctSolution: correctSolution,
+          isCorrect,
+          aiVerification: aiAnswer
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error al verificar con IA:', error);
+      toast.error('Error al verificar la respuesta con la IA. Por favor, intenta de nuevo.');
+      setVerificationResult({ 
+        isCorrect: false, 
+        message: 'No se pudo verificar la respuesta. Por favor, intenta de nuevo.' 
+      });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -203,8 +371,12 @@ const SolveExerciseModal = ({
   if (!isOpen || !exercise) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    <>
+      {/* Modal de verificación */}
+      <VerifyingAnswerModal isOpen={isVerifying} />
+      
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex-1 min-w-0">
@@ -302,13 +474,13 @@ const SolveExerciseModal = ({
                 <div className="flex gap-3">
                   <Button
                     type="submit"
-                    disabled={hasSubmitted || !userAnswer?.trim()}
+                    disabled={isVerifying || (hasSubmitted && verificationResult) || !userAnswer?.trim()}
                     className="flex-1"
                   >
-                    {hasSubmitted ? 'Respuesta Enviada' : 'Enviar Respuesta'}
+                    {isVerifying ? 'Verificando...' : hasSubmitted ? 'Respuesta Enviada' : 'Enviar Respuesta'}
                   </Button>
                   
-                  {hasSubmitted && !showSolution && (
+                  {hasSubmitted && verificationResult && !showSolution && (
                     <Button
                       type="button"
                       variant="outline"
@@ -319,6 +491,39 @@ const SolveExerciseModal = ({
                     </Button>
                   )}
                 </div>
+
+                {/* Resultado de la verificación */}
+                {verificationResult && (
+                  <div className={`mt-4 p-5 rounded-lg border-2 ${
+                    verificationResult.isCorrect 
+                      ? 'bg-green-50 border-green-500' 
+                      : 'bg-red-50 border-red-500'
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      {verificationResult.isCorrect ? (
+                        <svg className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      <div className="flex-1">
+                        <h4 className={`font-semibold text-lg mb-2 ${
+                          verificationResult.isCorrect ? 'text-green-800' : 'text-red-800'
+                        }`}>
+                          {verificationResult.isCorrect ? '¡Correcto!' : 'Incorrecto'}
+                        </h4>
+                        <p className={`text-sm leading-relaxed whitespace-pre-wrap ${
+                          verificationResult.isCorrect ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                          {verificationResult.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </form>
             </CardContent>
           </Card>
@@ -369,7 +574,8 @@ const SolveExerciseModal = ({
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

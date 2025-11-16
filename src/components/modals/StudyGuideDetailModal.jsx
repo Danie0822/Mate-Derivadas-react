@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '../../context/AuthContext';
 import { getLevelText, getLevelColor } from '../../schemas/studyGuideSchemas';
 import { getStudyGuideExercises } from '../../services/node/study-guides.service'
 import SolveExerciseModal from './SolveExerciseModal'
@@ -11,6 +12,7 @@ const StudyGuideDetailModal = ({
   onEdit,
   onDelete
 }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [isSolveModalOpen, setIsSolveModalOpen] = useState(false);
@@ -481,6 +483,7 @@ const StudyGuideDetailModal = ({
         onClose={handleCloseSolveModal}
         exercise={selectedExercise}
         onSubmitAnswer={handleSubmitAnswer}
+        userId={user?.id}
       />
     </div>
   );
