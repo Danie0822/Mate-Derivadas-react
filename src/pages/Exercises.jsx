@@ -2,9 +2,10 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 import Layout from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, Button, Search } from '../components/ui';
-import { ExerciseModal, DeleteExerciseModal, ExerciseDetailModal } from '../components/modals';
+import { ExerciseModal, DeleteExerciseModal, ExerciseDetailModal, SolveExerciseModal } from '../components/modals';
 import { UserTableSkeleton } from '../components/ui/Skeleton';
 import { 
   getExercises, 
@@ -14,11 +15,13 @@ import {
 } from '../services/node/exercises.service';
 
 export default function Exercises() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isSolveModalOpen, setIsSolveModalOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
   
   const queryClient = useQueryClient();
@@ -176,6 +179,22 @@ export default function Exercises() {
   const closeDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedExercise(null);
+  };
+
+  const openSolveModal = (exercise) => {
+    setSelectedExercise(exercise);
+    setIsSolveModalOpen(true);
+  };
+
+  const closeSolveModal = () => {
+    setIsSolveModalOpen(false);
+    setSelectedExercise(null);
+  };
+
+  const handleSubmitAnswer = (answerData) => {
+    console.log('Respuesta del usuario:', answerData);
+    toast.success('Respuesta enviada correctamente');
+    // Aquí puedes implementar la lógica de comparación o envío
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -394,10 +413,18 @@ export default function Exercises() {
                             </div>
 
                             <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
-                                <span className="text-xs text-gray-500">
-                                  {exercise.created_at ? new Date(exercise.created_at).toLocaleDateString() : 'N/A'}
-                                </span>
                                 <div className="flex flex-wrap gap-1">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    onClick={() => openSolveModal(exercise)}
+                                    className="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 text-green-600 hover:text-green-700"
+                                  >
+                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                    </svg>
+                                    Resolver
+                                  </Button>
                                   <Button 
                                     size="sm" 
                                     variant="ghost" 
@@ -508,6 +535,14 @@ export default function Exercises() {
           onConfirm={handleDeleteExercise}
           exercise={selectedExercise}
           isSubmitting={deleteExerciseMutation.isPending}
+        />
+
+        <SolveExerciseModal
+          isOpen={isSolveModalOpen}
+          onClose={closeSolveModal}
+          exercise={selectedExercise}
+          onSubmitAnswer={handleSubmitAnswer}
+          userId={user?.id}
         />
       </div>
     </Layout>
