@@ -452,7 +452,7 @@ const StudyGuideDetailModal = ({
           >
             Cerrar
           </button>
-          {onEdit && (
+          {user?.rol === 'admin' && onEdit && (
             <button
               onClick={() => onEdit(studyGuide)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
@@ -463,7 +463,7 @@ const StudyGuideDetailModal = ({
               Editar
             </button>
           )}
-          {onDelete && (
+          {user?.rol === 'admin' && onDelete && (
             <button
               onClick={() => onDelete(studyGuide)}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"

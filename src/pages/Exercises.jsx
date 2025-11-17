@@ -248,12 +248,14 @@ export default function Exercises() {
               Práctica con ejercicios de derivadas
             </p>
           </div>
-          <Button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="mt-4 sm:mt-0 bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0 shadow-lg"
-          >
-            Nuevo Ejercicio
-          </Button>
+          {user?.rol === 'admin' && (
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="mt-4 sm:mt-0 bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white border-0 shadow-lg"
+            >
+              Nuevo Ejercicio
+            </Button>
+          )}
         </div>
 
         {/* Búsqueda */}
@@ -433,22 +435,26 @@ export default function Exercises() {
                                   >
                                     Ver
                                   </Button>
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    onClick={() => openEditModal(exercise)}
-                                    className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50"
-                                  >
-                                    Editar
-                                  </Button>
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost"
-                                    onClick={() => openDeleteModal(exercise)}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  >
-                                    Eliminar
-                                  </Button>
+                                  {user?.rol === 'admin' && (
+                                    <>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        onClick={() => openEditModal(exercise)}
+                                        className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50"
+                                      >
+                                        Editar
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost"
+                                        onClick={() => openDeleteModal(exercise)}
+                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      >
+                                        Eliminar
+                                      </Button>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                           </CardContent>

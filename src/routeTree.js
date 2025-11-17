@@ -12,8 +12,6 @@ import { Route as AIChatRouteImport } from './routes/ai-chat'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as StudyGuidesRouteImport } from './routes/study-guides'
 import { Route as UserProgressRouteImport } from './routes/user-progress'
-import { Route as PDFUploadRouteImport } from './routes/pdf-upload'
-import { Route as EmbeddingsRouteImport } from './routes/embeddings'
 
 // Create route instances
 const LoginRoute = LoginRouteImport.update({
@@ -70,18 +68,6 @@ const UserProgressRoute = UserProgressRouteImport.update({
   getParentRoute: () => rootRouteImport,
 })
 
-const PDFUploadRoute = PDFUploadRouteImport.update({
-  id: '/pdf-upload',
-  path: '/pdf-upload',
-  getParentRoute: () => rootRouteImport,
-})
-
-const EmbeddingsRoute = EmbeddingsRouteImport.update({
-  id: '/embeddings',
-  path: '/embeddings',
-  getParentRoute: () => rootRouteImport,
-})
-
 // Define route children
 const rootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -93,8 +79,6 @@ const rootRouteChildren = {
   CalculatorRoute: CalculatorRoute,
   StudyGuidesRoute: StudyGuidesRoute,
   UserProgressRoute: UserProgressRoute,
-  PDFUploadRoute: PDFUploadRoute,
-  EmbeddingsRoute: EmbeddingsRoute,
 }
 
 // Export the route tree

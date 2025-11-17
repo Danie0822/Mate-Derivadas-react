@@ -1,9 +1,11 @@
 import { Navigate, useLocation } from '@tanstack/react-router';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
+import { useEffect } from 'react';
 
-// Componente para rutas protegidas
-export function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
+// Componente para rutas protegidas con control de roles
+export function ProtectedRoute({ children, allowedRoles = ['admin', 'user'] }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   // Mostrar loading mientras se verifica la autenticación
@@ -21,6 +23,12 @@ export function ProtectedRoute({ children }) {
   // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Verificar si el usuario tiene el rol adecuado
+  if (user && !allowedRoles.includes(user.rol)) {
+    toast.error('No tienes permisos para acceder a esta página');
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

@@ -1,3 +1,4 @@
+import { useAuth } from '../../context/AuthContext';
 import { Card, CardContent, CardHeader, Button } from '../ui';
 
 const ExerciseDetailModal = ({ 
@@ -7,6 +8,7 @@ const ExerciseDetailModal = ({
   onEdit,
   onDelete
 }) => {
+  const { user } = useAuth();
   if (!isOpen || !exercise) return null;
 
   const getDifficultyColor = (difficulty) => {
@@ -99,8 +101,8 @@ const ExerciseDetailModal = ({
                   </div>
                 )}
 
-                {/* Solución */}
-                {exercise.solution && (
+                {/* Solución - Solo para administradores */}
+                {user?.rol === 'admin' && exercise.solution && (
                   <div>
                     <h4 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-2">
                       ✅ Solución
@@ -181,7 +183,7 @@ const ExerciseDetailModal = ({
                 >
                   Cerrar
                 </Button>
-                {onEdit && (
+                {user?.rol === 'admin' && onEdit && (
                   <Button
                     type="button"
                     onClick={() => {
@@ -193,7 +195,7 @@ const ExerciseDetailModal = ({
                     Editar Ejercicio
                   </Button>
                 )}
-                {onDelete && (
+                {user?.rol === 'admin' && onDelete && (
                   <Button
                     type="button"
                     variant="ghost"

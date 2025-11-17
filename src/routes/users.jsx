@@ -4,7 +4,7 @@ import { ProtectedRoute } from '../components/ProtectedRoute'
 
 export const Route = createFileRoute('/users')({
   component: () => (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['admin']}>
       <Users />
     </ProtectedRoute>
   ),
