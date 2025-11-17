@@ -50,9 +50,9 @@ pythonApi.interceptors.response.use(
   }
 );
 
-// Helper para extraer el .data.data de la respuesta de Node.js API
+// Helper para extraer el .data de la respuesta de Node.js API
 const extractNodeData = (promise) =>
-  promise.then(res => res.data.data);
+  promise.then(res => res.data);
 
 // Helper para extraer data de la respuesta de Python API
 const extractPythonData = (promise) =>

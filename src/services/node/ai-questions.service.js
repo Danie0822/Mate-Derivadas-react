@@ -34,3 +34,17 @@ export const getAIQuestions = () => crud.get(`/${RESOURCE}`)
  * @returns {Promise} Promesa que resuelve con los datos de la pregunta y respuesta
  */
 export const getAIQuestion = (questionId) => crud.get(`/${RESOURCE}/${questionId}`)
+
+/**
+ * Obtiene el historial completo de una conversación específica
+ * @param {string} conversationId - ID de la conversación
+ * @returns {Promise} Promesa que resuelve con el historial de mensajes de la conversación
+ */
+export const getConversationHistory = (conversationId) => crud.get(`/${RESOURCE}/conversation/${conversationId}`)
+
+/**
+ * Obtiene o crea una conversación activa para un usuario
+ * @param {string} userId - ID del usuario
+ * @returns {Promise} Promesa que resuelve con la conversación activa
+ */
+export const getOrCreateActiveConversation = (userId) => crud.get(`/${RESOURCE}/active-conversation/${userId}`)
