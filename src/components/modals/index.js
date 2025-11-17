@@ -8,3 +8,4 @@ export { default as DeleteStudyGuideModal } from './DeleteStudyGuideModal';
 export { default as StudyGuideDetailModal } from './StudyGuideDetailModal';
 export { default as SolveExerciseModal } from './SolveExerciseModal';
 export { default as VerifyingAnswerModal } from './VerifyingAnswerModal';
+export { default as ExerciseAttemptDetailModal } from './ExerciseAttemptDetailModal';
