@@ -3,6 +3,78 @@ import Layout from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, Button, ChatList } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import chatService from '../services/chatService';
+import { InlineMath, BlockMath } from 'react-katex';
+import 'katex/dist/katex.min.css';
+
+// Componente para renderizar contenido con LaTeX
+const MathContent = ({ content }) => {
+  const renderContent = (text) => {
+    const parts = [];
+    let lastIndex = 0;
+    
+    // Expresiones en bloque $$...$$
+    const blockMatches = [...text.matchAll(/\$\$([^$]+?)\$\$/g)];
+    
+    // Expresiones inline $...$
+    const inlineMatches = [...text.matchAll(/(?<!\$)\$([^$\n]+?)\$(?!\$)/g)];
+    
+    // Combinar y ordenar todas las coincidencias
+    const allMatches = [...blockMatches, ...inlineMatches].sort((a, b) => a.index - b.index);
+    
+    allMatches.forEach((match, index) => {
+      // Agregar texto antes de la expresión matemática
+      if (match.index > lastIndex) {
+        parts.push(
+          <span key={`text-${index}`}>
+            {text.slice(lastIndex, match.index)}
+          </span>
+        );
+      }
+      
+      // Agregar la expresión matemática
+      const isBlock = match[0].startsWith('$$');
+      const mathContent = match[1];
+      
+      try {
+        if (isBlock) {
+          parts.push(
+            <BlockMath key={`math-${index}`} math={mathContent} />
+          );
+        } else {
+          parts.push(
+            <InlineMath key={`math-${index}`} math={mathContent} />
+          );
+        }
+      } catch (error) {
+        // Si hay error en el LaTeX, mostrar el texto original
+        parts.push(
+          <span key={`error-${index}`} className="text-red-500 bg-red-50 px-1 rounded">
+            {match[0]}
+          </span>
+        );
+      }
+      
+      lastIndex = match.index + match[0].length;
+    });
+    
+    // Agregar el texto restante
+    if (lastIndex < text.length) {
+      parts.push(
+        <span key="text-end">
+          {text.slice(lastIndex)}
+        </span>
+      );
+    }
+    
+    return parts.length > 0 ? parts : [text];
+  };
+  
+  return (
+    <div className="math-content">
+      {renderContent(content)}
+    </div>
+  );
+};
 
 export default function AIChat() {
   const { user } = useAuth();
@@ -304,7 +376,13 @@ export default function AIChat() {
                                   : 'bg-gradient-to-r from-gray-50 to-blue-50 text-gray-900 border border-blue-200/50'
                               }`}
                             >
-                              <div className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</div>
+                              <div className="text-sm leading-relaxed">
+                                {message.type === 'ai' ? (
+                                  <MathContent content={message.content} />
+                                ) : (
+                                  <div className="whitespace-pre-wrap">{message.content}</div>
+                                )}
+                              </div>
                               <div className={`text-xs mt-2 ${
                                 message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
                               }`}>

@@ -9,3 +9,40 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 }
+
+/* Estilos personalizados para ecuaciones LaTeX */
+@layer components {
+  .math-content {
+    @apply leading-relaxed;
+  }
+  
+  .math-content .katex {
+    font-size: 1.1em !important;
+  }
+  
+  .math-content .katex-display {
+    @apply my-3 text-center;
+  }
+  
+  .math-content .katex-display > .katex {
+    @apply text-left;
+  }
+  
+  /* Mejorar legibilidad en mensajes */
+  .math-content .katex .base {
+    @apply text-gray-800;
+  }
+  
+  /* Colores para elementos matemáticos */
+  .math-content .katex .mord {
+    @apply text-blue-800;
+  }
+  
+  .math-content .katex .mop {
+    @apply text-green-700;
+  }
+  
+  .math-content .katex .mbin {
+    @apply text-purple-600;
+  }
+}
