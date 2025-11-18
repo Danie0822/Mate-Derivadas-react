@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "3000:80"
+    container_name: mate-derivadas-react-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - mate-derivadas-network
+
+networks:
+  mate-derivadas-network:
+    driver: bridge
