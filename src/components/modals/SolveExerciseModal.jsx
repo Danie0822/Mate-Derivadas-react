@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import toast from 'react-hot-toast';
 import { Button, Input, Card, CardContent, CardHeader } from '../ui';
 import VerifyingAnswerModal from './VerifyingAnswerModal';
-import { compareExpressions, isComplexExpression, stripHtml, buildVerificationPrompt } from '../../utils/mathUtils';
+import { compareExpressions, isComplexExpression, stripHtml, buildVerificationPrompt, parseAIVerification } from '../../utils/mathUtils';
 import { askAIQuestion } from '../../services/node/ai-questions.service';
 import { createUserExercise } from '../../services/node/user-exercises.service';
 
@@ -279,23 +279,19 @@ const SolveExerciseModal = ({
       
       const response = await askAIQuestion({
         user_id: userId,
-        question: prompt
+        question: prompt,
+        disable_latex: true  // Importante: desactiva el formateo LaTeX para verificaciones
       });
       
-      const aiAnswer = response.data?.answer || response.answer || '';
+      console.log('📡 Respuesta completa de la API:', response);
       
-      // Parsear la respuesta de la IA
-      const isCorrect = aiAnswer.toUpperCase().includes('CORRECTO') && !aiAnswer.toUpperCase().includes('INCORRECTO');
+      // Extraer la respuesta de la IA del formato de respuesta
+      const aiAnswer = response.data?.answer || response.answer || response.data || response;
       
-      let explanation = '';
-      if (isCorrect) {
-        // Para respuestas correctas, mostrar toda la respuesta de la IA como explicación
-        explanation = aiAnswer.replace(/^CORRECTO:?\s*/i, '').trim() || '¡Tu respuesta es matemáticamente correcta! La IA ha verificado que es equivalente a la solución esperada.';
-      } else {
-        // Extraer la explicación después de "INCORRECTO:"
-        const match = aiAnswer.match(/INCORRECTO:\s*(.+)/i);
-        explanation = match ? match[1].trim() : 'La respuesta no es matemáticamente equivalente a la solución esperada.';
-      }
+      console.log('🤖 Respuesta IA extraída:', aiAnswer);
+      
+      // Parsear la respuesta de la IA usando la función mejorada
+      const { isCorrect, explanation } = parseAIVerification(aiAnswer);
       
       setVerificationResult({ 
         isCorrect, 
